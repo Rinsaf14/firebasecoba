@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invaite Coba</title>
+    <style>
+      label {
+        display: inline-block;
+        font-size: 16px;
+        font-family: Arial, Helvetica, sans-serif;
+        width: 110px;
+      }
+
+      input,
+      select {
+        width: 180px;
+        height: 30px;
+        font-size: 16px;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      button {
+        height: 30px;
+        width: 70px;
+      }
+
+      #displayData {
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        background-color: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <label>First Name</label>
+    <input type="text" id="FnameInp" />
+    <br /><br />
+
+    <label for="Last Name">Last Name</label>
+    <input type="text" id="LnameInp" />
+    <br /><br />
+
+    <label>Department</label>
+    <select id="DeptInp">
+      <option value="Development">Development</option>
+      <option value="Testing">Testing</option>
+      <option value="Management">Management</option>
+      <option value="Administration">Administration</option>
+    </select>
+    <br /><br />
+
+    <label>Can Swim</label>
+    <select id="SwimInp">
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+    <br /><br />
+
+    <label>CNIC No</label>
+    <input type="number" id="CnicInp" />
+    <br /><br />
+
+    <button id="AddBtn">Add</button>
+
+    <div id="displayData">
+      <!-- Data from Firebase will be displayed here -->
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        child,
+        get,
+        set,
+        onValue,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAswmGym011cxMi7DJeYHJuvWHxrLcJKPs",
+        authDomain: "invaitecoba.firebaseapp.com",
+        databaseURL: "https://invaitecoba-default-rtdb.firebaseio.com",
+        projectId: "invaitecoba",
+        storageBucket: "invaitecoba.appspot.com",
+        messagingSenderId: "807271727434",
+        appId: "1:807271727434:web:7910400bf6dd9fa8f9c1b3",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase();
+
+      let FnameInp = document.getElementById("FnameInp");
+      let LnameInp = document.getElementById("LnameInp");
+      let DeptInp = document.getElementById("DeptInp");
+      let SwimInp = document.getElementById("SwimInp");
+      let CnicInp = document.getElementById("CnicInp");
+      let AddBtn = document.getElementById("AddBtn");
+      let displayData = document.getElementById("displayData");
+
+      // Function to add data to Firebase
+      function AddData() {
+        set(ref(db, "TamuUndangan/" + CnicInp.value), {
+          nameofemployee: {
+            firstname: FnameInp.value,
+            lastname: LnameInp.value,
+          },
+          department: DeptInp.value,
+          canswim: SwimInp.value == "yes",
+          cnic: Number(CnicInp.value),
+        })
+          .then(() => {
+            alert("Data Added Successfully");
+          })
+          .catch((error) => {
+            alert("Unsuccessful");
+            console.log(error);
+          });
+      }
+
+      // Function to retrieve and display all data from Firebase
+      function RetData() {
+        const dbRef = ref(db, "TamuUndangan");
+
+        onValue(dbRef, (snapshot) => {
+          displayData.innerHTML = ""; // Clear previous data
+          snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            displayData.innerHTML += `
+            <div style="margin-bottom: 20px; border: 1px solid #ccc; padding: 10px;">
+              <h2>Data Employee</h2>
+              <p><strong>First Name:</strong> ${
+                data.nameofemployee.firstname
+              }</p>
+              <p><strong>Last Name:</strong> ${data.nameofemployee.lastname}</p>
+              <p><strong>Department:</strong> ${data.department}</p>
+              <p><strong>Can Swim:</strong> ${data.canswim ? "Yes" : "No"}</p>
+              <p><strong>CNIC:</strong> ${data.cnic}</p>
+            </div>
+          `;
+          });
+        });
+      }
+
+      AddBtn.addEventListener("click", () => {
+        AddData();
+        RetData(); // Call RetData after adding data
+      });
+
+      // Call RetData initially to display existing data on page load
+      RetData();
+    </script>
+  </body>
+</html>
